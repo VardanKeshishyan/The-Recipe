@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Recipe Code — Smart Recipe Search</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css">
+  <style>
+    .top-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .secondary-btn {
+      border: 1px solid #d9d4cc;
+      background: white;
+      color: #3e342b;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .secondary-btn:hover {
+      background: #f7f4ef;
+    }
+
+    .results-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .recipe-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .pill-btn {
+      border: 1px solid #d9d4cc;
+      background: white;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 13px;
+      cursor: pointer;
+    }
+
+    .pill-btn.active {
+      border-color: #c76a42;
+      color: #c76a42;
+      background: #fff7f2;
+    }
+
+    .mini-meta {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      font-size: 13px;
+      color: #6c6258;
+      margin-top: 10px;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 16, 12, 0.55);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      z-index: 1000;
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      width: min(760px, 100%);
+      max-height: 88vh;
+      overflow: auto;
+      background: #fffdf9;
+      border-radius: 18px;
+      box-shadow: 0 30px 80px rgba(0,0,0,0.18);
+      padding: 28px;
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      border: 1px solid #ddd6ca;
+      background: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .modal h2 {
+      margin-bottom: 8px;
+    }
+
+    .modal-section {
+      margin-top: 24px;
+    }
+
+    .modal-section h3 {
+      margin-bottom: 10px;
+      font-size: 20px;
+    }
+
+    .ingredient-list,
+    .similar-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .ingredient-chip {
+      display: inline-block;
+      border: 1px solid #e3ddd2;
+      background: #faf7f2;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 13px;
+      margin: 4px 6px 0 0;
+    }
+
+    .step-list {
+      padding-left: 20px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .similar-card {
+      border: 1px solid #e3ddd2;
+      border-radius: 14px;
+      padding: 12px;
+      cursor: pointer;
+      background: white;
+    }
+
+    .similar-card:hover {
+      background: #faf7f2;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .view-switch {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    .view-btn {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      padding: 8px 4px;
+      cursor: pointer;
+      font: inherit;
+      color: #7b7166;
+    }
+
+    .view-btn.active {
+      color: #c76a42;
+      border-bottom-color: #c76a42;
+    }
+
+    .status-note {
+      font-size: 13px;
+      color: #7b7166;
+    }
+    
+    .input-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid #e3ddd2;
+      background: #faf7f2;
+      border-radius: 999px;
+      padding: 8px 12px;
+      font-size: 13px;
+      color: #4b4036;
+    }
+
+    .input-chip button {
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 14px;
+      color: #8a7a6a;
+      padding: 0;
+    }
+
+    .navbar-auth {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .navbar-user {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: var(--color-text-muted);
+    }
+
+    .navbar-user .avatar {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, var(--color-primary), #f97316);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .btn-nav {
+      font-size: 0.85rem;
+      font-weight: 600;
+      font-family: var(--font-sans);
+      padding: 8px 16px;
+      border-radius: 100px;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+    }
+
+    .btn-nav-outline {
+      background: transparent;
+      color: var(--color-text-muted);
+      border: 1.5px solid var(--color-border);
+    }
+
+    .btn-nav-outline:hover {
+      border-color: var(--color-primary);
+      color: var(--color-primary);
+      background: rgba(232,93,44,0.04);
+    }
+
+    .btn-nav-solid {
+      background: var(--color-primary);
+      color: #fff;
+      border: 1.5px solid var(--color-primary);
+    }
+
+    .btn-nav-solid:hover {
+      background: var(--color-primary-hover);
+      border-color: var(--color-primary-hover);
+    }
+
+    .navbar-auth {
+      visibility: hidden;
+    }
+
+    .navbar-auth.ready {
+      visibility: visible;
+    }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <div class="container" style="display:flex; align-items:center; justify-content:space-between;">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <a href="/" class="navbar-brand" onclick="showView('search'); return false;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 11h.01"/><path d="M11 15h.01"/><path d="M16 16h.01"/><path d="m2 16 20 6-6-20A20 20 0 0 0 2 16"/><path d="M5.71 17.11a17.04 17.04 0 0 1 11.4-11.4"/></svg>
+          The Recipe Code
+        </a>
+        <span class="navbar-tag">CS Project</span>
+      </div>
+
+      <div class="navbar-auth" id="navbarAuth">
+      </div>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="container">
+      <div class="hero-badge">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        Hybrid Recipe Search + Personalization
+      </div>
+
+      <h1>Find the Perfect Recipe<br>with <span>What You Have</span></h1>
+
+      <p class="hero-description">
+        Search by <b> ingredients or dish name</b>, then save favorites and build personalized recommendations over time.
+      </p>
+
+      <form class="search-form" id="search-form" style="display:block;">
+        <div style="position:relative;" id="dishSearchWrap">
+          <span class="search-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </span>
+          <input id="query-input" type="text" placeholder="Search by dish, cuisine, or style... e.g. mexican, pasta, soup">
+        </div>
+
+        <div style="margin-top:14px;">
+          <input
+            id="ingredient-input"
+            type="text"
+            placeholder="Add ingredients and press Enter... e.g. chicken, garlic, rice"
+            style="width:100%;padding:16px 18px;border-radius:999px;border:1px solid #ddd6ca;font:inherit;"
+          >
+          <div id="ingredient-chips" style="margin-top:10px;display:flex;flex-wrap:wrap;gap:8px;"></div>
+        </div>
+
+        <div class="top-actions" style="margin-top:16px;">
+          <button type="submit">Search Recipes</button>
+          <button class="secondary-btn" type="button" onclick="loadForYou()">For You</button>
+          <button class="secondary-btn" type="button" onclick="loadProfile()">My Kitchen</button>
+        </div>
+      </form>
+
+      <div class="features-strip">
+        <div class="feature-item">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+          Search + Recommendation
+        </div>
+        <div class="feature-item">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 18h8"/><path d="M3 22h18"/><path d="M14 22a7 7 0 1 0 0-14h-1"/></svg>
+          TF-IDF Ranking
+        </div>
+        <div class="feature-item">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          Favorites + Made History
+        </div>
+      </div>
+
+      <div class="view-switch">
+        <button class="view-btn active" id="btn-search-view" type="button" onclick="showView('search')">Results</button>
+        <button class="view-btn" id="btn-foryou-view" type="button" onclick="showView('foryou')">For You</button>
+        <button class="view-btn" id="btn-profile-view" type="button" onclick="showView('profile')">My Kitchen</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="results-section">
+    <div class="container">
+
+      <div id="search-view">
+        <div id="results-area">
+          <div class="empty-state">
+            <svg class="empty-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 11h.01"/><path d="M11 15h.01"/><path d="M16 16h.01"/><path d="m2 16 20 6-6-20A20 20 0 0 0 2 16"/></svg>
+            <h3>Ready to cook something great?</h3>
+            <p>Search for ingredients, cuisines, or dish names to get started.</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="foryou-view" class="hidden">
+        <div id="foryou-area">
+          <div class="empty-state">
+            <h3>Personalized picks will appear here</h3>
+            <p>Browse, favorite, and mark recipes as made to build your taste profile.</p>
+          </div>
+        </div>
+      </div>
+
+      <div id="profile-view" class="hidden">
+        <div id="profile-area">
+          <div class="empty-state">
+            <h3>Your profile summary will appear here</h3>
+            <p>Open a few recipes to start tracking your activity.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container">
+      <span class="footer-brand">The Recipe Code</span> CS Next Generation Search Systems (UC Irvine)
+    </div>
+  </footer>
+
+  <div class="modal-overlay" id="modal-overlay" onclick="maybeCloseModal(event)">
+    <div class="modal">
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <script>
+    let lastResults = [];
+    let profile = { viewed: {}, favorited: [], made: [] };
+    let selectedIngredients = [];
+
+    function showView(view) {
+      ['search','foryou','profile'].forEach(v => {
+        document.getElementById(`${v}-view`).classList.toggle('hidden', v !== view);
+        document.getElementById(`btn-${v}-view`).classList.toggle('active', v === view);
+      });
+      if (view === 'foryou')  loadForYou();
+      if (view === 'profile') loadProfile();
+    }
+
+    document.getElementById('search-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      await doSearch();
+    });
+
+    async function doSearch() {
+      const query = document.getElementById('query-input').value.trim();
+      const pendingIngredient = document.getElementById('ingredient-input').value.trim();
+
+      if (pendingIngredient) {
+        addIngredient(pendingIngredient);
+        document.getElementById('ingredient-input').value = '';
+      }
+
+      if (!query && selectedIngredients.length === 0) {
+        renderEmpty('results-area', 'No query entered', 'Try a dish name, cuisine, or add ingredients like chicken, pasta, or garlic.');
+        return;
+      }
+
+      document.getElementById('results-area').innerHTML = `
+        <div class="empty-state">
+          <h3>Searching...</h3>
+          <p>Please wait a moment.</p>
+        </div>
+      `;
+
+      showView('search');
+
+      try {
+        const res = await fetch('/api/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            query,
+            ingredients: selectedIngredients,
+            k: 20
+          })
+        });
+
+        if (!res.ok) {
+          throw new Error(`Search request failed: ${res.status}`);
+        }
+
+        const data = await res.json();
+        lastResults = data.results || [];
+        renderResults(lastResults, 'results-area', `${lastResults.length} recipes found`);
+      } catch (e) {
+        renderEmpty('results-area', 'Search failed', e.message);
+      }
+    }
+
+    async function loadForYou() {
+      document.getElementById('foryou-area').innerHTML = `
+        <div class="empty-state">
+          <h3>Loading recommendations...</h3>
+          <p>Personalizing based on your history${selectedIngredients.length ? ' and your ingredients' : ''}…</p>
+        </div>
+      `;
+
+      try {
+        const res = await fetch('/api/recommendations/for-you', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ingredients: selectedIngredients })
+        });
+        if (!res.ok) throw new Error(`Recommendation request failed: ${res.status}`);
+        const data = await res.json();
+
+        if (!data.results || data.results.length === 0) {
+          renderEmpty('foryou-area', 'No recommendations yet', 'Interact with a few recipes first.');
+          return;
+        }
+
+        let label = 'Popular Recipes';
+        if (!data.cold_start) {
+          label = 'Picked for You';
+        } else if (data.mode === 'ingredients') {
+          label = 'Based on Your Ingredients';
+        }
+
+        const modeTag = data.cold_start
+          ? `<span class="foryou-mode-badge">${data.mode === 'ingredients' ? '🥕 Ingredient match' : '⭐ Popular'}</span>`
+          : `<span class="foryou-mode-badge">✨ Personalized</span>`;
+
+        const area = document.getElementById('foryou-area');
+        area.innerHTML = `
+          <div class="results-header-row">
+            <h2>${label}</h2>
+            ${modeTag}
+          </div>
+          <div class="results-grid">
+            ${data.results.map((r, i) => recipeCardHTML(r, i + 1)).join('')}
+          </div>
+        `;
+      } catch (e) {
+        renderEmpty('foryou-area', 'Could not load recommendations', e.message);
+      }
+    }
+
+    async function loadProfile() {
+      document.getElementById('profile-area').innerHTML =
+        `<div class="empty-state"><h3>Loading your kitchen…</h3></div>`;
+      try {
+        const res = await fetch('/api/profile');
+        if (!res.ok) throw new Error(`Profile failed: ${res.status}`);
+        const p = await res.json();
+
+        if (!p.favorited_count && !p.made_count && !p.viewed_count) {
+          renderEmpty('profile-area', 'Your Kitchen is empty',
+            'Open recipes, favorite them, or mark as made to build your history.');
+          return;
+        }
+
+        let html = `
+          <div class="results-header-row"><h2>My Kitchen</h2></div>
+          <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:28px;">
+            ${[['Viewed', p.viewed_count], ['Favorited', p.favorited_count], ['Made', p.made_count]].map(([label, n]) => `
+              <div style="background:#faf7f2;border:1px solid #e3ddd2;border-radius:14px;padding:14px 20px;text-align:center;min-width:90px;">
+                <div style="font-size:28px;font-weight:700;color:#c76a42;">${n ?? 0}</div>
+                <div style="font-size:12px;color:#7b7166;">${label}</div>
+              </div>`).join('')}
+          </div>`;
+
+        if (p.favorited_recipes?.length) {
+          html += `<h3 style="margin:24px 0 12px">❤️ Favorites</h3>
+                  <div class="results-grid">${p.favorited_recipes.map((r,i) => recipeCardHTML(r,i+1)).join('')}</div>`;
+        }
+        if (p.made_recipes?.length) {
+          html += `<h3 style="margin:24px 0 12px">✅ Made</h3>
+                  <div class="results-grid">${p.made_recipes.map((r,i) => recipeCardHTML(r,i+1)).join('')}</div>`;
+        }
+        if (p.viewed_recipes?.length) {
+          html += `<h3 style="margin:24px 0 12px">👀 Recently Viewed</h3>
+                  <div class="results-grid">${p.viewed_recipes.map((r,i) => recipeCardHTML(r,i+1)).join('')}</div>`;
+        }
+
+        document.getElementById('profile-area').innerHTML = html;
+      } catch (e) {
+        renderEmpty('profile-area', 'Could not load profile', e.message);
+      }
+    }
+
+    function renderResults(results, containerId, label) {
+      const area = document.getElementById(containerId);
+
+      if (!results || results.length === 0) {
+        renderEmpty(containerId, 'No recipes found', 'Try a broader query like pasta, soup, or chicken.');
+        return;
+      }
+
+      area.innerHTML = `
+        <div class="results-header-row">
+          <h2>${label}</h2>
+        </div>
+        <div class="results-grid">
+          ${results.map((r, i) => recipeCardHTML(r, i + 1)).join('')}
+        </div>
+      `;
+    }
+
+    function recipeCardHTML(r, rank) {
+      const score = Number(r.score || 0).toFixed(2);
+
+      return `
+        <div class="result-card" onclick="openRecipe(${r.RecipeId})">
+          <div class="result-card-left">
+            <span class="result-rank">${rank}</span>
+            <div class="result-info">
+              <div class="result-name">${escapeHtml(r.Name || 'Untitled')}</div>
+              <div class="result-score">
+                Relevance: ${score}
+                ${r.RecipeCategory ? ` · ${escapeHtml(r.RecipeCategory)}` : ''}
+              </div>
+              <div class="mini-meta">
+                ${r.TotalTime ? `<span>${escapeHtml(r.TotalTime)}</span>` : ''}
+                ${r.Calories ? `<span>${Math.round(Number(r.Calories))} cal</span>` : ''}
+                ${r.AggregatedRating ? `<span>★ ${Number(r.AggregatedRating).toFixed(1)}</span>` : ''}
+              </div>
+            </div>
+          </div>
+          <div class="recipe-actions" onclick="event.stopPropagation()">
+            <button class="pill-btn ${r.is_favorited ? 'active' : ''}" onclick="toggleFavorite(${r.RecipeId}, this)">
+              ${r.is_favorited ? '❤️ Favorited' : '🤍 Favorite'}
+            </button>
+            <button class="pill-btn ${r.is_made ? 'active' : ''}" onclick="toggleMade(${r.RecipeId}, this)">
+              ${r.is_made ? '✅ Made' : '☑️ Made'}
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    async function openRecipe(recipeId) {
+      const overlay = document.getElementById('modal-overlay');
+      const modal = document.getElementById('modal-content');
+
+      modal.innerHTML = `
+        <button class="modal-close" onclick="closeModal()">✕</button>
+        <div class="empty-state">
+          <h3>Loading recipe...</h3>
+          <p>Please wait a moment.</p>
+        </div>
+      `;
+
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+
+      try {
+        const res = await fetch(`/api/recipe/${recipeId}`);
+        if (!res.ok) throw new Error(`Recipe request failed: ${res.status}`);
+
+        const r = await res.json();
+        if (r.error) throw new Error(r.error);
+
+        modal.innerHTML = `
+          <button class="modal-close" onclick="closeModal()">✕</button>
+          <div class="hero-badge">${escapeHtml(r.RecipeCategory || 'Recipe')}</div>
+          <h2>${escapeHtml(r.Name || 'Untitled')}</h2>
+
+          <div class="recipe-actions" style="margin-top:16px;">
+            <button class="pill-btn ${r.is_favorited ? 'active' : ''}" onclick="toggleFavorite(${r.RecipeId}, this, true)">
+              ${r.is_favorited ? '❤️ Favorited' : '🤍 Favorite'}
+            </button>
+            <button class="pill-btn ${r.is_made ? 'active' : ''}" onclick="toggleMade(${r.RecipeId}, this, true)">
+              ${r.is_made ? '✅ Made it' : '☑️ Mark as made'}
+            </button>
+          </div>
+
+          <div class="mini-meta" style="margin-top:16px;">
+            <span>★ ${Number(r.AggregatedRating || 0).toFixed(1)}</span>
+            <span>${r.ReviewCount || 0} reviews</span>
+            ${r.TotalTime ? `<span>${escapeHtml(r.TotalTime)}</span>` : ''}
+            ${r.Calories ? `<span>${Math.round(Number(r.Calories))} cal</span>` : ''}
+            ${r.RecipeServings ? `<span>${escapeHtml(String(r.RecipeServings))} servings</span>` : ''}
+          </div>
+
+          ${r.Description ? `<div class="modal-section"><p>${escapeHtml(r.Description)}</p></div>` : ''}
+
+          ${(r.parsed_ingredients || []).length ? `
+            <div class="modal-section">
+              <h3>Ingredients</h3>
+              <div class="ingredient-list">
+                ${(r.parsed_ingredients || []).map(i => `<span class="ingredient-chip">${escapeHtml(i)}</span>`).join('')}
+              </div>
+            </div>
+          ` : ''}
+
+          ${(r.parsed_instructions || []).length ? `
+            <div class="modal-section">
+              <h3>Instructions</h3>
+                ${r.instruction_note ? `<div class="status-note">${escapeHtml(r.instruction_note)}</div>` : ``}
+                <ol class="step-list">
+                  ${(r.parsed_instructions || []).map(step => `<li>${escapeHtml(step)}</li>`).join('')}
+                </ol>
+            </div>
+          ` : ''}
+
+          ${(r.similar || []).length ? `
+            <div class="modal-section">
+              <h3>You Might Also Like</h3>
+              <div class="similar-list">
+                ${(r.similar || []).map(s => `
+                  <div class="similar-card" onclick="openRecipe(${s.RecipeId})">
+                    <strong>${escapeHtml(s.Name || 'Untitled')}</strong>
+                    <div class="status-note">${escapeHtml(s.RecipeCategory || '')}</div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+        `;
+      } catch (e) {
+        modal.innerHTML = `
+          <button class="modal-close" onclick="closeModal()">✕</button>
+          <div class="empty-state">
+            <h3>Could not load recipe</h3>
+            <p>${escapeHtml(e.message)}</p>
+          </div>
+        `;
+      }
+    }
+
+    function renderIngredientChips() {
+      const root = document.getElementById('ingredient-chips');
+      root.innerHTML = selectedIngredients.map((ing, idx) => `
+        <span class="input-chip">
+        ${escapeHtml(ing)}
+        <button type="button" onclick="removeIngredient(${idx})">✕</button>
+        </span>
+      `).join('');
+    }
+
+    function addIngredient(raw) {
+      const ing = String(raw || '').trim().toLowerCase();
+      if (!ing) return;
+      if (selectedIngredients.includes(ing)) return;
+      selectedIngredients.push(ing);
+      renderIngredientChips();
+    }
+
+    function removeIngredient(index) {
+      selectedIngredients.splice(index, 1);
+      renderIngredientChips();
+    }
+
+    document.getElementById('ingredient-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        addIngredient(e.target.value.replace(/,$/, ''));
+        e.target.value = '';
+      }
+    });
+
+    function closeModal() {
+      document.getElementById('modal-overlay').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    function maybeCloseModal(e) {
+      if (e.target.id === 'modal-overlay') closeModal();
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    async function toggleFavorite(recipeId, btn, modal = false) {
+      try {
+        const res = await fetch(`/api/profile/favorite/${recipeId}`, { method: 'POST' });
+        const data = await res.json();
+
+        btn.classList.toggle('active', !!data.favorited);
+        btn.textContent = data.favorited ? '❤️ Favorited' : '🤍 Favorite';
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function toggleMade(recipeId, btn, modal = false) {
+      try {
+        const res = await fetch(`/api/profile/made/${recipeId}`, { method: 'POST' });
+        const data = await res.json();
+
+        btn.classList.toggle('active', !!data.made);
+        btn.textContent = data.made ? '✅ Made it' : '☑️ Mark as made';
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    function renderEmpty(containerId, title, message) {
+      document.getElementById(containerId).innerHTML = `
+        <div class="empty-state">
+          <h3>${escapeHtml(title)}</h3>
+          <p>${escapeHtml(message)}</p>
+        </div>
+      `;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+  </script>
+
+  <script>
+    (async function initNavAuth() {
+      const wrap = document.getElementById("navbarAuth");
+      if (!wrap) return;
+
+      try {
+        const res = await fetch("/api/auth/status");
+        const data = await res.json();
+
+        if (data.logged_in) {
+          const initial = (data.username || "?")[0].toUpperCase();
+          wrap.innerHTML = `
+            <div class="navbar-user">
+              <div class="avatar">${initial}</div>
+              <span>${data.username}</span>
+            </div>
+            <button class="btn-nav btn-nav-outline" id="logoutBtn">Sign out</button>
+          `;
+          document.getElementById("logoutBtn").addEventListener("click", async () => {
+            await fetch("/api/auth/logout", { method: "POST" });
+            window.location.href = "/login";
+          });
+        } else {
+          wrap.innerHTML = `
+            <a href="/login" class="btn-nav btn-nav-outline">Sign in</a>
+            <a href="/register" class="btn-nav btn-nav-solid">Create account</a>
+          `;
+        }
+      } catch (e) {
+      } finally {
+        wrap.classList.add("ready");
+      }
+    })();
+  </script>
+</body>
+</html>

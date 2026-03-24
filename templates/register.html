@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Create Account — Recipe Kitchen</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --color-bg: #faf9f6;
+      --color-surface: #ffffff;
+      --color-primary: #e85d2c;
+      --color-primary-hover: #cf4e22;
+      --color-text: #1e1e1e;
+      --color-text-muted: #6b7280;
+      --color-border: #e5e7eb;
+      --color-error-bg: #fff1f0;
+      --color-error: #dc2626;
+      --color-success-bg: #f0fdf4;
+      --color-success: #16a34a;
+      --radius: 12px;
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.07);
+      --shadow-lg: 0 8px 30px rgba(0,0,0,0.09);
+      --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+      --font-display: "Playfair Display", Georgia, serif;
+    }
+
+    html { font-size: 16px; }
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      background: rgba(255,255,255,0.92);
+      border-bottom: 1px solid var(--color-border);
+      padding: 16px 24px;
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--color-text);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
+    .navbar-brand svg { color: var(--color-primary); }
+    .navbar-tag {
+      font-size: 0.65rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--color-primary);
+      background: rgba(232,93,44,0.08);
+      padding: 3px 8px;
+      border-radius: 4px;
+    }
+
+    /* ── MAIN LAYOUT ── */
+    .page-wrap {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+    }
+
+    .auth-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 20px;
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      max-width: 460px;
+      overflow: hidden;
+    }
+
+    .auth-card-header {
+      background: linear-gradient(135deg, var(--color-primary), #f97316);
+      padding: 36px 40px 28px;
+      color: #fff;
+      text-align: center;
+    }
+    .auth-card-header .icon-wrap {
+      width: 56px;
+      height: 56px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      backdrop-filter: blur(4px);
+    }
+    .auth-card-header h1 {
+      font-family: var(--font-display);
+      font-size: 1.7rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+    .auth-card-header p {
+      font-size: 0.9rem;
+      opacity: 0.88;
+    }
+
+    .auth-card-body {
+      padding: 36px 40px 40px;
+    }
+
+    /* ── FORM ── */
+    .field {
+      margin-bottom: 16px;
+    }
+    .field label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--color-text);
+      margin-bottom: 7px;
+    }
+    .field .hint {
+      font-size: 0.78rem;
+      color: var(--color-text-muted);
+      margin-top: 5px;
+    }
+    .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .input-wrap svg {
+      position: absolute;
+      left: 14px;
+      color: var(--color-text-muted);
+      width: 18px;
+      height: 18px;
+      pointer-events: none;
+      flex-shrink: 0;
+    }
+    .input-wrap input {
+      width: 100%;
+      padding: 13px 14px 13px 42px;
+      border: 2px solid var(--color-border);
+      border-radius: 10px;
+      font-size: 0.97rem;
+      font-family: var(--font-sans);
+      color: var(--color-text);
+      background: var(--color-bg);
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .input-wrap input:focus {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 0 4px rgba(232,93,44,0.1);
+      background: #fff;
+    }
+    .input-wrap input.valid {
+      border-color: var(--color-success);
+    }
+    .input-wrap input::placeholder { color: #9ca3af; }
+
+    /* Password strength bar */
+    .strength-bar-wrap {
+      margin-top: 8px;
+      height: 4px;
+      background: var(--color-border);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+    .strength-bar {
+      height: 100%;
+      border-radius: 100px;
+      transition: width 0.3s, background 0.3s;
+      width: 0%;
+    }
+    .strength-label {
+      font-size: 0.75rem;
+      margin-top: 4px;
+      color: var(--color-text-muted);
+    }
+
+    /* ── ERROR BANNER ── */
+    .error-banner {
+      display: none;
+      align-items: center;
+      gap: 10px;
+      background: var(--color-error-bg);
+      border: 1px solid #fecaca;
+      color: var(--color-error);
+      font-size: 0.88rem;
+      font-weight: 500;
+      padding: 12px 14px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    .error-banner.visible { display: flex; }
+    .error-banner svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+    /* ── SUBMIT BUTTON ── */
+    .btn-primary {
+      width: 100%;
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      font-family: var(--font-sans);
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .btn-primary:hover { background: var(--color-primary-hover); }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    .btn-primary.loading .spinner { display: block; }
+    .btn-primary.loading .btn-text { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── PERKS ── */
+    .perks {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 24px;
+      padding: 16px;
+      background: var(--color-bg);
+      border-radius: 10px;
+      border: 1px solid var(--color-border);
+    }
+    .perk {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.85rem;
+      color: var(--color-text-muted);
+    }
+    .perk-icon {
+      width: 28px;
+      height: 28px;
+      background: rgba(232,93,44,0.1);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .perk-icon svg {
+      width: 15px;
+      height: 15px;
+      color: var(--color-primary);
+    }
+
+    /* ── DIVIDER ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 24px 0;
+      color: var(--color-text-muted);
+      font-size: 0.82rem;
+    }
+    .divider::before, .divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--color-border);
+    }
+
+    /* ── SWITCH LINK ── */
+    .switch-link {
+      text-align: center;
+      font-size: 0.9rem;
+      color: var(--color-text-muted);
+    }
+    .switch-link a {
+      color: var(--color-primary);
+      font-weight: 600;
+      text-decoration: none;
+      transition: color 0.15s;
+    }
+    .switch-link a:hover { color: var(--color-primary-hover); text-decoration: underline; }
+
+    /* ── FOOTER ── */
+    .footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+      border-top: 1px solid var(--color-border);
+    }
+    .footer-brand { font-weight: 600; color: var(--color-primary); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 500px) {
+      .auth-card-header { padding: 28px 24px 22px; }
+      .auth-card-body { padding: 28px 24px 32px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <a href="/" class="navbar-brand">
+      Recipe Kitchen
+      <span class="navbar-tag">Your Friend</span>
+    </a>
+  </nav>
+
+  <!-- Page -->
+  <main class="page-wrap">
+    <div class="auth-card">
+
+      <div class="auth-card-header">
+        <div class="icon-wrap">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/>
+          </svg>
+        </div>
+        <h1>Create your kitchen</h1>
+        <p>Save recipes, track favorites, get personalized picks</p>
+      </div>
+
+      <div class="auth-card-body">
+
+        <!-- Perks -->
+        <div class="perks">
+          <div class="perk">
+            <div class="perk-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+            </div>
+            Save favorites &amp; mark recipes you've made
+          </div>
+          <div class="perk">
+            <div class="perk-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/>
+              </svg>
+            </div>
+            Your kitchen persists across every visit
+          </div>
+          <div class="perk">
+            <div class="perk-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
+              </svg>
+            </div>
+            AI recommendations that learn your taste
+          </div>
+        </div>
+
+        <div class="error-banner" id="errorBanner">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+          </svg>
+          <span id="errorText"></span>
+        </div>
+
+        <div class="field">
+          <label for="username">Username</label>
+          <div class="input-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+            <input type="text" id="username" placeholder="chef_anna" autocomplete="username" />
+          </div>
+          <div class="hint">Letters, numbers, and underscores only. Min 3 characters.</div>
+        </div>
+
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+            </svg>
+            <input type="password" id="password" placeholder="••••••••" autocomplete="new-password" oninput="updateStrength()" />
+          </div>
+          <div class="strength-bar-wrap">
+            <div class="strength-bar" id="strengthBar"></div>
+          </div>
+          <div class="strength-label" id="strengthLabel">Min 6 characters</div>
+        </div>
+
+        <div class="field">
+          <label for="confirm">Confirm Password</label>
+          <div class="input-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <input type="password" id="confirm" placeholder="••••••••" autocomplete="new-password" />
+          </div>
+        </div>
+
+        <button class="btn-primary" id="registerBtn" onclick="doRegister()">
+          <div class="spinner"></div>
+          <span class="btn-text">Create My Kitchen</span>
+        </button>
+
+        <div class="divider">already have an account?</div>
+
+        <div class="switch-link">
+          <a href="/login">Sign in instead</a>
+        </div>
+
+      </div>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <span class="footer-brand">Recipe Kitchen</span> - Your personal cookbook
+  </footer>
+
+  <script>
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") doRegister();
+    });
+
+    function showError(msg) {
+      const banner = document.getElementById("errorBanner");
+      document.getElementById("errorText").textContent = msg;
+      banner.classList.add("visible");
+    }
+    function clearError() {
+      document.getElementById("errorBanner").classList.remove("visible");
+    }
+
+    function updateStrength() {
+      const pw = document.getElementById("password").value;
+      const bar = document.getElementById("strengthBar");
+      const label = document.getElementById("strengthLabel");
+
+      let score = 0;
+      if (pw.length >= 6) score++;
+      if (pw.length >= 10) score++;
+      if (/[A-Z]/.test(pw)) score++;
+      if (/[0-9]/.test(pw)) score++;
+      if (/[^A-Za-z0-9]/.test(pw)) score++;
+
+      const widths  = ["0%", "20%", "40%", "65%", "85%", "100%"];
+      const colors  = ["#e5e7eb", "#ef4444", "#f97316", "#eab308", "#22c55e", "#16a34a"];
+      const labels  = ["", "Too short", "Weak", "Fair", "Good", "Strong"];
+
+      bar.style.width      = widths[score];
+      bar.style.background = colors[score];
+      label.textContent    = score === 0 ? "Min 6 characters" : labels[score];
+    }
+
+    async function doRegister() {
+      clearError();
+      const btn      = document.getElementById("registerBtn");
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value;
+      const confirm  = document.getElementById("confirm").value;
+
+      if (!username || !password || !confirm) {
+        showError("Please fill in all fields.");
+        return;
+      }
+      if (password !== confirm) {
+        showError("Passwords do not match.");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.classList.add("loading");
+
+      try {
+        const res = await fetch("/api/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username, password, confirm }),
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+          window.location.href = "/";
+        } else {
+          showError(data.error || "Something went wrong. Please try again.");
+        }
+      } catch (err) {
+        showError("Network error. Please check your connection.");
+      } finally {
+        btn.disabled = false;
+        btn.classList.remove("loading");
+      }
+    }
+  </script>
+</body>
+</html>
