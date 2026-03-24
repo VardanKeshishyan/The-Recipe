@@ -3,7 +3,7 @@ import pandas as pd
 import re
 
 # Loads recipe data
-def load_recipes(path="data/recipes.csv"):
+def load_recipes(path):
     df = pd.read_csv(path)
     return df
 
