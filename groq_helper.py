@@ -3,7 +3,7 @@ import json
 import re
 from groq import Groq
 
-client = Groq(api_key="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")
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 def _extract_json(text):
     if not text:
