@@ -4,7 +4,7 @@
   ],
   "functions": {
     "api/**/*.py": {
-      "excludeFiles": "{tests/**,__tests__/**,**/*.test.py,**/test_*.py,fixtures/**,__fixtures__/**,testdata/**,sample-data/**,assets/**,__pycache__/**,**/*.pyc,**/*.pyo,.git/**,.github/**,README*}"
+      "excludeFiles": "{data/**,tests/**,__tests__/**,**/*.test.py,**/test_*.py,fixtures/**,__fixtures__/**,testdata/**,sample-data/**,assets/**,__pycache__/**,**/*.pyc,**/*.pyo,.git/**,.github/**,README*}"
     }
   }
 }
