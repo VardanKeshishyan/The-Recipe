@@ -3,7 +3,9 @@ import json
 import re
 from groq import Groq
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+def get_client():
+    return Groq(api_key=os.getenv("GROQ_API_KEY"))
+
 
 def _extract_json(text):
     if not text:
@@ -73,6 +75,8 @@ Original instructions:
 """
 
     try:
+        client = get_client()
+
         response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[
