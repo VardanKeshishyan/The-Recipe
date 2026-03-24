@@ -13,6 +13,7 @@ import pandas as pd
 from groq_helper import enhance_recipe
 import asyncio
 from vercel.blob import AsyncBlobClient
+import urllib.request
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -26,9 +27,7 @@ async def _download_blob_once(pathname: str):
         raise FileNotFoundError(f"Blob not found: {pathname}")
 
     local_path = os.path.join(TMP_DIR, os.path.basename(pathname))
-    with open(local_path, "wb") as f:
-        async for chunk in result.stream:
-            f.write(chunk)
+    urllib.request.urlretrieve(result.blob.download_url, local_path)
     return local_path
     
 def get_blob_file(pathname: str):
