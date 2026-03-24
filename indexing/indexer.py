@@ -1,5 +1,6 @@
 from collections import defaultdict
 import pickle
+import gzip
 import os
 import numpy as np
 import pandas as pd
@@ -16,9 +17,16 @@ def save_pickle(obj, path: str):
     with open(path, "wb") as f:
         pickle.dump(obj, f)
 
-def load_pickle(path: str):
+def load_pickle(path):
     with open(path, "rb") as f:
-        return pickle.load(f)
+        magic = f.read(2)
+        f.seek(0)
+
+        if magic == b"\x1f\x8b":
+            with gzip.open(path, "rb") as gz:
+                return pickle.load(gz)
+        else:
+            return pickle.load(f)
 
 def save_meta(meta: dict, path: str = META_PATH):
     save_pickle(meta, path)
