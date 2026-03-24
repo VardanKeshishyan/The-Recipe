@@ -45,11 +45,10 @@ app = Flask(
 app.secret_key = os.environ.get("SECRET_KEY", "recipe-search-dev-key-change-in-prod")
 
 recipes_csv = get_blob_file("recipes.csv")
-#reviews_csv = get_blob_file("reviews.csv")
 inv_path = get_blob_file("inverted_index.pkl")
 tfidf_path = get_blob_file("tfidf_index.pkl")
 
-df = preprocess.load_recipes(recipes_csv, reviews_csv)
+df = preprocess.load_recipes(recipes_csv)
 df = preprocess.preprocess_recipes(df)
 
 if not os.path.exists(inv_path):
