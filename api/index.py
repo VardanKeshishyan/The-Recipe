@@ -67,10 +67,10 @@ else:
 rid_to_row = {rid: i for i, rid in enumerate(df["RecipeId"].to_numpy())}
 print(f"Ready! {len(df)} recipes indexed.")
 
-PROFILE_DIR = os.path.join(BASE_DIR, "data", "profiles")
+PROFILE_DIR = "/tmp/profiles"
 os.makedirs(PROFILE_DIR, exist_ok=True)
 
-USERS_FILE = os.path.join(BASE_DIR, "data", "users.json")
+USERS_FILE = "/tmp/users.json"
 
 def _load_users() -> dict:
     if not os.path.exists(USERS_FILE):
