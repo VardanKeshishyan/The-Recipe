@@ -22,14 +22,15 @@ os.makedirs(TMP_DIR, exist_ok=True)
 async def _download_blob_once(pathname: str):
     client = AsyncBlobClient()
     result = await client.get(pathname, access="private")
-    if result is None:
+    if result is None or result.status_code != 200:
         raise FileNotFoundError(f"Blob not found: {pathname}")
 
     local_path = os.path.join(TMP_DIR, os.path.basename(pathname))
     with open(local_path, "wb") as f:
-        f.write(result.body)
+        async for chunk in result.stream:
+            f.write(chunk)
     return local_path
-
+    
 def get_blob_file(pathname: str):
     local_path = os.path.join(TMP_DIR, os.path.basename(pathname))
     if os.path.exists(local_path):
