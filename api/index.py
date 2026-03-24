@@ -11,8 +11,31 @@ import hashlib
 from datetime import datetime
 import pandas as pd
 from groq_helper import enhance_recipe
+import asyncio
+from vercel.blob import AsyncBlobClient
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+TMP_DIR = "/tmp/recipe-data"
+os.makedirs(TMP_DIR, exist_ok=True)
+
+async def _download_blob_once(pathname: str):
+    client = AsyncBlobClient()
+    result = await client.get(pathname, access="private")
+    if result is None or result.status_code != 200:
+        raise FileNotFoundError(f"Blob not found: {pathname}")
+
+    local_path = os.path.join(TMP_DIR, os.path.basename(pathname))
+    with open(local_path, "wb") as f:
+        async for chunk in result.stream:
+            f.write(chunk)
+    return local_path
+
+def get_blob_file(pathname: str):
+    local_path = os.path.join(TMP_DIR, os.path.basename(pathname))
+    if os.path.exists(local_path):
+        return local_path
+    return asyncio.run(_download_blob_once(pathname))
 
 app = Flask(
     __name__,
@@ -21,14 +44,13 @@ app = Flask(
 )
 app.secret_key = os.environ.get("SECRET_KEY", "recipe-search-dev-key-change-in-prod")
 
-df = preprocess.load_recipes()
+recipes_csv = get_blob_file("recipes.csv")
+reviews_csv = get_blob_file("reviews.csv")
+inv_path = get_blob_file("inverted_index.pkl")
+tfidf_path = get_blob_file("tfidf_index.pkl")
+
+df = preprocess.load_recipes(recipes_csv, reviews_csv)
 df = preprocess.preprocess_recipes(df)
-
-INDEX_DIR = os.path.join(BASE_DIR, "data")
-os.makedirs(INDEX_DIR, exist_ok=True)
-
-inv_path = os.path.join(INDEX_DIR, "inverted_index.pkl")
-tfidf_path = os.path.join(INDEX_DIR, "tfidf_index.pkl")
 
 if not os.path.exists(inv_path):
     print("Building inverted index...")
