@@ -9,6 +9,8 @@ Download the Datasets:
 Download the datasets from https://www.kaggle.com/datasets/irkaal/foodcom-recipes-and-reviews?select=recipes.csv
 
 After downloading, place the CSV files into a folder called data/ in the project root:
+
+
 RecipeRecommendation/
 ├── data/
 │ ├── recipes.csv
