@@ -12,8 +12,11 @@ After downloading, place the CSV files into a folder called data/ in the project
 
 
 RecipeRecommendation/
+
 ├── data/
+
 │ ├── recipes.csv
+
 │ └── reviews.csv
 
 Run preprocessing and indexing:
