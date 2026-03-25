@@ -2,7 +2,8 @@
 HI this is web
 Clone the repository:
 
-git clone https://github.com/kylesw12/RecipeRecommendation.git
+git clone https://github.com/VardanKeshishyan/The-Recipe.git
+
 cd RecipeRecommendation
 Download the Datasets:
 Download the datasets from https://www.kaggle.com/datasets/irkaal/foodcom-recipes-and-reviews?select=recipes.csv
